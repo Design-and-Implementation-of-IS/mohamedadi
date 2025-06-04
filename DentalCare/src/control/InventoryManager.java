@@ -22,6 +22,7 @@ public class InventoryManager {
         InventoryRecord record = new InventoryRecord(item, LocalDate.now(), item.getQuantity());
         inventoryRecords.add(record);
     }
+    public void updateStock()
 
     public List<Item> getItems() {
         return items;
