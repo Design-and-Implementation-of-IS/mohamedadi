@@ -1,0 +1,82 @@
+<Inventory>
+    <Item>
+        <serialNum>4021</serialNum>
+        <itemName>Hand Sanitizer</itemName>
+        <description>cleaning</description>
+        <quantityInStock>75</quantityInStock>
+        <supplierId>800</supplierId>
+        <expDate>2026-12-31</expDate>
+    </Item>
+    <Item>
+        <serialNum>4022</serialNum>
+        <itemName>X-Ray Film</itemName>
+        <description>radiology</description>
+        <quantityInStock>20</quantityInStock>
+        <supplierId>801</supplierId>
+        <expDate>2028-06-15</expDate>
+    </Item>
+    <Item>
+        <serialNum>4023</serialNum>
+        <itemName>Cotton Rolls</itemName>
+        <description>absorption</description>
+        <quantityInStock>300</quantityInStock>
+        <supplierId>802</supplierId>
+        <expDate>2027-05-10</expDate>
+    </Item>
+    <Item>
+        <serialNum>4024</serialNum>
+        <itemName>Disinfectant Wipes</itemName>
+        <description>surface cleaning</description>
+        <quantityInStock>150</quantityInStock>
+        <supplierId>803</supplierId>
+        <expDate>2027-09-01</expDate>
+    </Item>
+    <Item>
+        <serialNum>4025</serialNum>
+        <itemName>Dental Bibs</itemName>
+        <description>patient use</description>
+        <quantityInStock>500</quantityInStock>
+        <supplierId>804</supplierId>
+        <expDate>2029-02-28</expDate>
+    </Item>
+    <Item>
+        <serialNum>4026</serialNum>
+        <itemName>Fluoride Gel</itemName>
+        <description>preventive treatment</description>
+        <quantityInStock>45</quantityInStock>
+        <supplierId>805</supplierId>
+        <expDate>2028-03-15</expDate>
+    </Item>
+    <Item>
+        <serialNum>4027</serialNum>
+        <itemName>Face Shields</itemName>
+        <description>protection</description>
+        <quantityInStock>200</quantityInStock>
+        <supplierId>806</supplierId>
+        <expDate>2026-07-30</expDate>
+    </Item>
+    <Item>
+        <serialNum>4028</serialNum>
+        <itemName>Surgical Masks</itemName>
+        <description>personal protection</description>
+        <quantityInStock>400</quantityInStock>
+        <supplierId>807</supplierId>
+        <expDate>2027-11-20</expDate>
+    </Item>
+    <Item>
+        <serialNum>4029</serialNum>
+        <itemName>Gauze Pads</itemName>
+        <description>wound care</description>
+        <quantityInStock>180</quantityInStock>
+        <supplierId>808</supplierId>
+        <expDate>2029-04-05</expDate>
+    </Item>
+    <Item>
+        <serialNum>4030</serialNum>
+        <itemName>Thermometer Covers</itemName>
+        <description>hygiene</description>
+        <quantityInStock>90</quantityInStock>
+        <supplierId>809</supplierId>
+        <expDate>2028-10-10</expDate>
+    </Item>
+</Inventory>

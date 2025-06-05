@@ -1,7 +1,9 @@
 package main;
 
 import boundary.AccessLoader;
+import boundary.XMLParser;
 import control.InventoryManager;
+import control.SupirXMLImporter;
 import entity.Item;
 import entity.Supplier;
 
@@ -14,7 +16,7 @@ public class Main {
         List<Item> items = AccessLoader.loadItems();
         System.out.println("=== Loaded Items from Access ===");
         for (Item item : items) {
-            System.out.println(item); // Make sure toString() is overridden in Item
+            System.out.println(item);
         }
 
         // Create InventoryManager instance
@@ -41,6 +43,15 @@ public class Main {
         for (Item alert : alerts) {
             System.out.println(alert);
         }
+
+        // === Step 6: Import data from Supir XML ===
+        System.out.println("=== Importing from XML ===");
+        XMLParser parser = new XMLParser();
+        SupirXMLImporter importer = new SupirXMLImporter(parser, manager);
+
+        // XML file should be in your project root or provide full path
+        String xmlPath = "supir_items.xml";
+        importer.importFromSupir(xmlPath);
     }
 }
 
