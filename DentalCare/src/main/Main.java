@@ -21,19 +21,19 @@ public class Main {
         InventoryManager manager = new InventoryManager();
 
         // Step 1: Add supplier with valid numeric ID (must exist before item insertion)
-        Supplier supplier = new Supplier("820", "NewSupplier", "0528888888", "newsupplier@mail.com", "820 Elm Street");
+        Supplier supplier = new Supplier("821", "NewSupplier1", "0528888887", "newsupplier1@mail.com", "821 Elm Street");
         manager.addSupplier(supplier);
 
         // Step 2: Add a new item referencing that supplier
-        Item newItem = new Item(999, "Dental Mirror", "Used for inspection", "Tools", 15,
+        Item newItem = new Item(4020, "Dental Mirror", "Used for inspection", "Tools", 15,
                 LocalDate.of(2025, 12, 31), supplier);
         manager.addItem(newItem);
 
         // Step 3: Update stock for the new item
-        manager.updateStock(999, 25);
+        manager.updateStock(4020, 25);
 
         // Step 4: Assign supplier to item (demonstration)
-        manager.assignSupplier(999, supplier);
+        manager.assignSupplier(4020, supplier);
 
         // Step 5: Generate inventory alerts
         System.out.println("=== Inventory Alerts ===");
