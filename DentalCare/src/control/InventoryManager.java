@@ -7,12 +7,42 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 
 public class InventoryManager {
-    private static final String DB_PATH = "jdbc:ucanaccess://C:/Users/mhema/database2016b.accdb";
+    private static final String DB_PATH = "jdbc:ucanaccess://C:/Users/mhema/DentalCareData.accdb";
+    private final InventoryAlertGenerator alertGenerator;
+
+    public InventoryManager() {
+        this.alertGenerator = new InventoryAlertGenerator();
+        validateDatabaseConnection();
+    }
+
+    private void validateDatabaseConnection() {
+        File dbFile = new File("C:/Users/mhema/DentalCareData.accdb");
+        if (!dbFile.exists()) {
+            throw new RuntimeException("Database file not found at: " + dbFile.getAbsolutePath() + 
+                "\nPlease ensure the database file exists and you have proper permissions.");
+        }
+        
+        // Test the connection
+        try (Connection conn = getConnection()) {
+            // Connection successful
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to connect to database. Error: " + e.getMessage(), e);
+        }
+    }
+
+    private Connection getConnection() throws SQLException {
+        try {
+            return DriverManager.getConnection(DB_PATH);
+        } catch (SQLException e) {
+            throw new SQLException("Failed to connect to database at " + DB_PATH + ". Error: " + e.getMessage(), e);
+        }
+    }
 
     public void addSupplier(Supplier supplier) {
-        try (Connection conn = DriverManager.getConnection(DB_PATH)) {
+        try (Connection conn = getConnection()) {
             // Check if supplier already exists
             String checkSql = "SELECT COUNT(*) FROM TblSuppliers WHERE supplierId = ?";
             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
@@ -37,12 +67,12 @@ public class InventoryManager {
                 System.out.println("Supplier already exists with ID " + supplier.getId());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to add supplier: " + e.getMessage(), e);
         }
     }
 
     public void addItem(Item item) {
-        try (Connection conn = DriverManager.getConnection(DB_PATH)) {
+        try (Connection conn = getConnection()) {
             // Check if item already exists
             String checkSql = "SELECT COUNT(*) FROM TblInventoryItems WHERE serialNum = ?";
             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
@@ -79,13 +109,13 @@ public class InventoryManager {
                 System.out.println("❌ Item already exists with ID " + item.getId());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to add item: " + e.getMessage(), e);
         }
     }
 
 
     public void updateStock(int itemId, int newQuantity) {
-        try (Connection conn = DriverManager.getConnection(DB_PATH)) {
+        try (Connection conn = getConnection()) {
             String sql = "UPDATE TblInventoryItems SET quantityInStock = ? WHERE serialNum = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, newQuantity);
@@ -96,12 +126,12 @@ public class InventoryManager {
             }
             stmt.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to update stock: " + e.getMessage(), e);
         }
     }
 
     public void assignSupplier(int itemId, Supplier supplier) {
-        try (Connection conn = DriverManager.getConnection(DB_PATH)) {
+        try (Connection conn = getConnection()) {
             String sql = "UPDATE TblInventoryItems SET supplierId = ? WHERE serialNum = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, Integer.parseInt(supplier.getId()));
@@ -112,16 +142,15 @@ public class InventoryManager {
             }
             stmt.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to assign supplier: " + e.getMessage(), e);
         }
     }
 
     public List<Item> generateAlerts() {
-        List<Item> lowStockItems = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(DB_PATH)) {
-            String sql = "SELECT * FROM TblInventoryItems WHERE quantityInStock < ?";
+        List<Item> items = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            String sql = "SELECT i.*, s.supplierName FROM TblInventoryItems i LEFT JOIN TblSuppliers s ON i.supplierId = s.supplierId";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, 10);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("serialNum");
@@ -130,17 +159,26 @@ public class InventoryManager {
                 int quantity = rs.getInt("quantityInStock");
                 Date sqlDate = rs.getDate("expDate");
                 LocalDate expiryDate = sqlDate != null ? sqlDate.toLocalDate() : null;
+                
+                // Get supplier info if available
+                int supplierId = rs.getInt("supplierId");
+                String supplierName = rs.getString("supplierName");
+                Supplier supplier = null;
+                if (!rs.wasNull() && supplierName != null) {
+                    supplier = new Supplier(String.valueOf(supplierId), supplierName, "", "", "");
+                }
 
-                // Adjust constructor: removed 'category', set to null
-                Item item = new Item(id, name, description, null, quantity, expiryDate, null);
-                lowStockItems.add(item);
+                Item item = new Item(id, name, description, null, quantity, expiryDate, supplier);
+                items.add(item);
             }
             rs.close();
             stmt.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to generate alerts: " + e.getMessage(), e);
         }
-        return lowStockItems;
+        
+        // Use the alert generator to check for low stock items
+        return alertGenerator.checkLowStock(items, 10);
     }
 }
 

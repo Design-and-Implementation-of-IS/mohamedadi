@@ -520,26 +520,57 @@ public class InventoryUI extends JFrame {
             }
 
     private void handleShowAlerts() {
-        List<Item> alerts = manager.generateAlerts();
-        outputArea.setText("");
-        String timestamp = String.format("Report generated on %tA, %<tB %<td, %<tY at %<tT%n%n", 
-            System.currentTimeMillis());
-        output(timestamp);
-        
-        if (alerts.isEmpty()) {
-            output("\n  === Inventory Alerts ===\n\n");
-            output("  ✓ No low-stock items found.\n\n");
+        try {
+            List<Item> alerts = manager.generateAlerts();
+            outputArea.setText("");
+            String timestamp = String.format("Report generated on %tA, %<tB %<td, %<tY at %<tT%n%n", 
+                System.currentTimeMillis());
+            output(timestamp);
+            
+            if (alerts.isEmpty()) {
+                output("\n  === Inventory Alerts ===\n\n");
+                output("  ✓ No low-stock items found.\n\n");
+            } else {
+                output("\n  === Inventory Alerts ===\n\n");
+                output("  ⚠ Low Stock Items (Threshold: 10)\n");
+                output("  " + "─".repeat(100) + "\n");
+                output(String.format("  %-8s %-25s %-20s %-8s %-25s\n",
+                    "Serial#", "Name", "Description", "Stock", "Supplier"));
+                output("  " + "─".repeat(100) + "\n");
+                
+                for (Item item : alerts) {
+                    String supplierInfo = item.getSupplier() != null ? 
+                        item.getSupplier().getId() + " - " + item.getSupplier().getName() : "Not Assigned";
+                    
+                    output(String.format("  %-8d %-25s %-20s %-8d %-25s\n",
+                        item.getId(),
+                        truncateString(item.getName(), 24),
+                        truncateString(item.getDescription(), 19),
+                        item.getQuantity(),
+                        truncateString(supplierInfo, 24)
+                    ));
+                }
+                output("  " + "─".repeat(100) + "\n");
+                output(String.format("\n  Total low stock items: %d\n", alerts.size()));
+                output("\n  Note: Items with stock below 10 units are flagged for reordering.\n\n");
+            }
+        } catch (RuntimeException e) {
+            handleDatabaseError(e);
+        }
+    }
+    
+    private void handleDatabaseError(Exception e) {
+        String errorMessage = e.getMessage();
+        if (errorMessage.contains("database") || errorMessage.contains("Database")) {
+            showError("Database Error", new Exception(
+                "Cannot connect to the database. Please ensure:\n" +
+                "1. The database file 'database2016b.accdb' exists in the project root or 'database' folder\n" +
+                "2. You have read/write permissions for the database file\n" +
+                "3. The database file is not corrupted\n\n" +
+                "Technical details: " + e.getMessage()
+            ));
         } else {
-            output("\n  === Inventory Alerts ===\n\n");
-            output("  Items requiring attention:\n");
-            output("  " + "─".repeat(50) + "\n");
-            alerts.forEach(item -> 
-                output(String.format("  • %-20s (ID: %-5d) - Stock: %d\n",
-                    truncateString(item.getName(), 19),
-                    item.getId(),
-                    item.getQuantity()))
-            );
-            output("\n  Total alerts: " + alerts.size() + "\n\n");
+            showError("Operation Failed", e);
         }
     }
     
@@ -558,45 +589,45 @@ public class InventoryUI extends JFrame {
             manager.addSupplier(supplier);
             
             Item item = new Item(serial, name, desc, null, qty, exp, supplier);
-                manager.addItem(item);
+            manager.addItem(item);
             
-                showMessage("\u2705 Item added: " + item.getName());
+            showMessage("\u2705 Item added: " + item.getName());
             clearAddItemFields();
-            refreshItemTable(); // Refresh table after adding
+            refreshItemTable();
         } catch (ValidationException ex) {
             showError("Validation Error", ex);
-            } catch (Exception ex) {
-            showError("Error adding item", ex);
+        } catch (RuntimeException e) {
+            handleDatabaseError(e);
         }
-            }
+    }
 
     private void handleUpdateItem() {
-            try {
+        try {
             validateUpdateFields();
             
             int serial = Integer.parseInt(tfUpdateSerial.getText().trim());
 
             if (!tfUpdateQuantity.getText().trim().isEmpty()) {
                 int qty = Integer.parseInt(tfUpdateQuantity.getText().trim());
-                    manager.updateStock(serial, qty);
-                }
+                manager.updateStock(serial, qty);
+            }
 
             if (!tfUpdateSupplierId.getText().trim().isEmpty()) {
                 int sid = Integer.parseInt(tfUpdateSupplierId.getText().trim());
                 Supplier supplier = new Supplier(String.valueOf(sid), "Manual", "", "", "");
                 manager.addSupplier(supplier);
                 manager.assignSupplier(serial, supplier);
-                }
+            }
 
-                showMessage("\u2705 Update complete for item " + serial);
+            showMessage("\u2705 Update complete for item " + serial);
             clearUpdateFields();
-            refreshItemTable(); // Refresh table after updating
+            refreshItemTable();
         } catch (ValidationException ex) {
             showError("Validation Error", ex);
-            } catch (Exception ex) {
-            showError("Failed to update", ex);
+        } catch (RuntimeException e) {
+            handleDatabaseError(e);
         }
-            }
+    }
 
     private void handleShowSuppliers() {
         List<Supplier> suppliers = AccessLoader.loadSuppliersAsList();
