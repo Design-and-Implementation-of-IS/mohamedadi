@@ -51,7 +51,7 @@ public class AccessLoader {
             ResultSet rs = stmt.executeQuery("SELECT * FROM TblInventoryItems")
         ) {
             while (rs.next()) {
-                String serialNumber = rs.getString("serialNum");
+                int serialNumber = rs.getInt("serialNum");
                 String name = rs.getString("itemName");
                 String description = rs.getString("description");
                 String category = rs.getString("description"); // Reuse for now
