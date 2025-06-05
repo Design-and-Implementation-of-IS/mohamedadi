@@ -13,7 +13,7 @@ public class AccessLoader {
     private static final String DB_PATH = "jdbc:ucanaccess://C:/Users/mhema/database2016b.accdb";
 
     /**
-     * Load all suppliers from TblSuppliers
+     * Load all suppliers from TblSuppliers (Map version, used for lookup)
      */
     public static Map<String, Supplier> loadSuppliers() {
         Map<String, Supplier> suppliers = new HashMap<>();
@@ -24,7 +24,7 @@ public class AccessLoader {
         ) {
             while (rs.next()) {
                 String id = rs.getString("supplierId");
-                String name = rs.getString("supplierName");         // ✅ fixed
+                String name = rs.getString("supplierName");
                 String contactNumber = rs.getString("phoneNum");
                 String email = rs.getString("email");
                 String address = rs.getString("address");
@@ -36,6 +36,13 @@ public class AccessLoader {
             e.printStackTrace();
         }
         return suppliers;
+    }
+
+    /**
+     * NEW: Load all suppliers as a List (for display)
+     */
+    public static List<Supplier> loadSuppliersAsList() {
+        return new ArrayList<>(loadSuppliers().values());
     }
 
     /**
@@ -54,8 +61,8 @@ public class AccessLoader {
                 int serialNumber = rs.getInt("serialNum");
                 String name = rs.getString("itemName");
                 String description = rs.getString("description");
-                String category = rs.getString("description"); // Reuse for now
-                int quantity = rs.getInt("quantityInStock");      // ✅ fixed
+                String category = rs.getString("description"); // Used in place of category
+                int quantity = rs.getInt("quantityInStock");
 
                 Date sqlDate = rs.getDate("expDate");
                 LocalDate expiryDate = (sqlDate != null) ? sqlDate.toLocalDate() : null;

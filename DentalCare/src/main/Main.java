@@ -1,57 +1,13 @@
 package main;
 
-import boundary.AccessLoader;
-import boundary.XMLParser;
-import control.InventoryManager;
-import control.SupirXMLImporter;
-import entity.Item;
-import entity.Supplier;
+import boundary.InventoryUI;
 
-import java.time.LocalDate;
-import java.util.List;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        // Load items from Access
-        List<Item> items = AccessLoader.loadItems();
-        System.out.println("=== Loaded Items from Access ===");
-        for (Item item : items) {
-            System.out.println(item);
-        }
-
-        // Create InventoryManager instance
-        InventoryManager manager = new InventoryManager();
-
-        // Step 1: Add supplier with valid numeric ID (must exist before item insertion)
-        Supplier supplier = new Supplier("821", "NewSupplier1", "0528888887", "newsupplier1@mail.com", "821 Elm Street");
-        manager.addSupplier(supplier);
-
-        // Step 2: Add a new item referencing that supplier
-        Item newItem = new Item(4020, "Dental Mirror", "Used for inspection", "Tools", 15,
-                LocalDate.of(2025, 12, 31), supplier);
-        manager.addItem(newItem);
-
-        // Step 3: Update stock for the new item
-        manager.updateStock(4020, 25);
-
-        // Step 4: Assign supplier to item (demonstration)
-        manager.assignSupplier(4020, supplier);
-
-        // Step 5: Generate inventory alerts
-        System.out.println("=== Inventory Alerts ===");
-        List<Item> alerts = manager.generateAlerts();
-        for (Item alert : alerts) {
-            System.out.println(alert);
-        }
-
-        // === Step 6: Import data from Supir XML ===
-        System.out.println("=== Importing from XML ===");
-        XMLParser parser = new XMLParser();
-        SupirXMLImporter importer = new SupirXMLImporter(parser, manager);
-
-        // XML file should be in your project root or provide full path
-        String xmlPath = "supir_items.xml";
-        importer.importFromSupir(xmlPath);
+        // Launch the DentalCare Inventory GUI
+        SwingUtilities.invokeLater(() -> new InventoryUI());
     }
 }
 
